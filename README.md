@@ -19,12 +19,15 @@ You need an Expo account, the same one used for the HaulMind app.
 npm install
 npm install -g eas-cli
 eas login
-eas init                      # first time only; links this app to your Expo account
+eas init                      # first time only; writes the project id into app.json — commit that change
 # Put the real CRM API URL in eas.json → build.apk.env.API_BASE_URL, e.g. https://crm.yourdomain.com/api/v1
 eas build -p android --profile apk
 ```
 
 The build runs on Expo's servers (about 10–15 min). At the end you get a link to download the `.apk`. Send that link to the team on WhatsApp, or install it from a laptop.
+
+### Later builds: one click from GitHub
+After the first build from a laptop, add a repo secret **EXPO_TOKEN** (expo.dev → Account settings → Access tokens). Then go to GitHub → **Actions → Build APK → Run workflow**. The APK link shows in the run summary (about 15 min).
 
 **Installing on a phone:** open the APK. Android will ask you to allow "Install unknown apps" for the browser or WhatsApp; allow it. Then open the app and sign in.
 

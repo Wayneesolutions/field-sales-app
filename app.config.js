@@ -2,8 +2,9 @@
 //   API_BASE_URL=https://crm.example.com/api/v1 npx expo start
 const API_BASE_URL = process.env.API_BASE_URL || "http://10.0.2.2:3000/api/v1";
 
-module.exports = {
-  expo: {
+// `eas init` writes the Expo project id into app.json; it is merged in below.
+module.exports = ({ config }) => ({
+  ...config,
     name: "Field Sales",
     slug: "wayne-field-sales",
     version: "1.0.0",
@@ -61,7 +62,7 @@ module.exports = {
     ],
     extra: {
       apiBaseUrl: API_BASE_URL,
-      eas: { projectId: process.env.EAS_PROJECT_ID },
+      ...(config.extra || {}),
+      eas: { ...((config.extra && config.extra.eas) || {}), ...(process.env.EAS_PROJECT_ID ? { projectId: process.env.EAS_PROJECT_ID } : {}) },
     },
-  },
-};
+});

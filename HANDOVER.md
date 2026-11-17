@@ -77,7 +77,7 @@ unzip field-sales-app.zip && cd field-sales-app
 npm install
 npm install -g eas-cli
 eas login       # sign in as wayneesolutions@gmail.com
-eas init        # first time only, links the app to the Expo account
+eas init        # first time only: writes the project id into app.json, commit + push it
 ```
 
 1. `eas.json` already points to `https://crm-hcm.wayneesolutions.com/api/v1` (both profiles). Nothing to change.
@@ -86,6 +86,9 @@ eas init        # first time only, links the app to the Expo account
    eas build -p android --profile apk
    ```
 3. The build runs on Expo's servers (about 10–15 min). You get a download link for the `.apk`. Send that link to the reps on WhatsApp.
+
+4. The first build asks **"Generate a new Android Keystore?"**. Answer **Y**. Expo stores the key, and every later build reuses it (so updates install over the old app).
+5. **After this first build, no laptop is needed.** Add a GitHub repo secret `EXPO_TOKEN` (expo.dev → Account settings → Access tokens). Then GitHub → **Actions → Build APK → Run workflow** builds a new APK, with the link in the run summary.
 
 **App details:** name "Field Sales", package `com.wayneesolutions.fieldsales`, version 1.0.0 (versionCode 1).
 **For an update:** raise `version` and `android.versionCode` in `app.config.js`, rebuild, and send the new link. Reps install it over the old app, and their login stays.

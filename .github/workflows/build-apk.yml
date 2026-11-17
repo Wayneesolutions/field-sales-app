@@ -1,0 +1,38 @@
+# One-click APK build on Expo's servers.
+# Needs: the first build done once from a laptop (`eas init` + `eas build`, which creates the
+# Android keystore on Expo), and a repo secret EXPO_TOKEN (expo.dev → Account settings →
+# Access tokens, signed in as the account that owns the project).
+# Run it from GitHub → Actions → "Build APK" → Run workflow. The download link appears in the
+# run summary and on expo.dev.
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "Note shown on the Expo build page"
+        required: false
+        default: "Built from GitHub"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm ci
+      - name: Build APK on EAS
+        run: |
+          eas build -p android --profile apk --non-interactive --wait --json --message "${{ inputs.message }}" > build.json
+          url=$(node -e "const b=require('./build.json');console.log((b[0]||b).artifacts?.buildUrl||'')")
+          id=$(node -e "const b=require('./build.json');console.log((b[0]||b).id)")
+          echo "### APK ready" >> "$GITHUB_STEP_SUMMARY"
+          echo "Download: $url" >> "$GITHUB_STEP_SUMMARY"
+          echo "Build page: https://expo.dev/builds/$id" >> "$GITHUB_STEP_SUMMARY"
