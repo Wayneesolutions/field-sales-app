@@ -17,13 +17,12 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
       - run: npm ci
       - name: Build APK locally (no EAS cloud credits)
         env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           ANDROID_HOME: /usr/local/lib/android/sdk
         run: eas build -p android --profile apk --local --non-interactive --output ./field-sales.apk
       - name: Upload APK
