@@ -42,8 +42,12 @@ export async function api<T = any>(path: string, { method = "GET", body, form, a
       body: form ?? (body !== undefined ? JSON.stringify(body) : undefined),
       signal: ctrl.signal,
     });
-  } catch {
-    throw new ApiError("No internet connection. Please try again.", 0, null);
+  } catch (err: any) {
+    const isTimeout = err?.name === "AbortError";
+    const msg = isTimeout
+      ? `Request timed out after ${timeoutMs / 1000}s (${API_BASE_URL})`
+      : `Cannot reach server (${API_BASE_URL}) — check your internet connection.`;
+    throw new ApiError(msg, 0, null);
   } finally {
     clearTimeout(timer);
   }

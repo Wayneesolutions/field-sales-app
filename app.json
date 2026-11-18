@@ -1,1 +1,11 @@
-{ "expo": {} }
+{
+  "expo": {
+    "extra": {
+      "apiBaseUrl": "http://10.0.2.2:3000/api/v1",
+      "eas": {
+        "projectId": "8f9835fd-c839-493f-9633-397da6811ceb"
+      }
+    },
+    "owner": "wayneesolutions"
+  }
+}
