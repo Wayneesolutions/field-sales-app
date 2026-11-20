@@ -88,6 +88,41 @@ export type Lead = {
   _id: string; firstName: string; lastName: string; companyName?: string | null; mobile: string; email?: string;
   status: LeadStatus; notes?: string | null; address?: { street?: string; city?: string };
   updatedAt: string;
+  /** Set once the lead has become a deal. */
+  convertedToOppurtunity?: string | null;
+};
+
+// ---- Deals: lead → deal (opportunity) → quote ----
+export type DealStatus = "open" | "in-progress" | "proposal-sent" | "won" | "lost";
+export type Deal = {
+  _id: string; opportunityName: string; status: DealStatus; description?: string | null;
+  expectedCloseDate?: string | null; winReason?: string | null; lostReason?: string | null;
+  CustomerId?: { _id: string; customerFirstName?: string; customerLastName?: string; customerEmail?: string } | string | null;
+  createdAt?: string; updatedAt?: string;
+};
+export type QuoteStatus = "draft" | "sent" | "approved" | "rejected";
+export type Quote = {
+  _id: string; quatationNumber: string; quatationDate: string; status: QuoteStatus;
+  totalAmountWithTax: number; subTotal: number; totalTaxAmount: number; discountAmount: number; taxPercentage: number;
+  opportunity?: { _id: string; opportunityName: string } | string | null;
+  customerResponse?: "approve" | "decline" | null;
+};
+export type Service = { _id: string; serviceName: string; serviceDescription?: string; servicePrice: number; serviceCategory?: string };
+
+export const DEAL_STATUSES: { key: DealStatus; label: string }[] = [
+  { key: "open", label: "Open" },
+  { key: "in-progress", label: "In progress" },
+  { key: "proposal-sent", label: "Quote sent" },
+  { key: "won", label: "Won" },
+  { key: "lost", label: "Lost" },
+];
+export const dealStatusLabel = (k?: string) => DEAL_STATUSES.find((x) => x.key === k)?.label ?? k ?? "";
+export const QUOTE_LABELS: Record<QuoteStatus, string> = { draft: "Draft", sent: "Sent", approved: "Approved", rejected: "Declined" };
+export const quoteDealId = (q: Quote) => (typeof q.opportunity === "string" ? q.opportunity : q.opportunity?._id) ?? "";
+export const customerOf = (d: Deal) => {
+  const c = d.CustomerId;
+  if (!c || typeof c === "string") return "";
+  return [c.customerFirstName, c.customerLastName].filter((x) => x && x !== "-").join(" ");
 };
 export type User = { _id: string; firstName: string; lastName: string; email: string; mobile: string; employeeId?: string };
 
