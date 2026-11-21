@@ -16,6 +16,8 @@ export default function LeadsScreen() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(false);
   const [picked, setPicked] = useState<Lead | null>(null);
+  const [dealEmail, setDealEmail] = useState("");
+  const [converting, setConverting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -39,6 +41,25 @@ export default function LeadsScreen() {
       load();
     } catch (e: any) {
       Alert.alert("Could not update", e?.message);
+    }
+  };
+
+  // Customer is interested: turn the lead into a deal (and a customer). Needs an email for quotes.
+  const makeDeal = async (lead: Lead) => {
+    setConverting(true);
+    try {
+      const r = await api<{ opportunity: { _id: string } }>(`/sales/leads/${lead._id}/convert`, {
+        method: "POST",
+        body: dealEmail.trim() ? { email: dealEmail.trim() } : {},
+      });
+      setPicked(null);
+      setDealEmail("");
+      load();
+      nav.navigate("Deal", { id: r.opportunity._id });
+    } catch (e: any) {
+      Alert.alert("Could not make it a deal", e?.message);
+    } finally {
+      setConverting(false);
     }
   };
 
@@ -69,15 +90,15 @@ export default function LeadsScreen() {
           <Pressable onPress={() => setPicked(item)} style={s.card}>
             <View style={[s.row, { justifyContent: "space-between" }]}>
               <Text style={{ fontWeight: "700", fontSize: 15, flex: 1 }}>{leadName(item)}</Text>
-              <Text style={{ color: statusColor[item.status], fontWeight: "700", fontSize: 12, textTransform: "capitalize" }}>{item.status}</Text>
+              <Text style={{ color: item.convertedToOppurtunity ? colors.green : statusColor[item.status], fontWeight: "700", fontSize: 12, textTransform: "capitalize" }}>{item.convertedToOppurtunity ? "Deal" : item.status}</Text>
             </View>
             <Text style={s.muted}>{item.mobile}{item.address?.city ? ` · ${item.address.city}` : ""}</Text>
           </Pressable>
         )}
       />
 
-      <Modal visible={!!picked} transparent animationType="slide" onRequestClose={() => setPicked(null)}>
-        <Pressable style={{ flex: 1, backgroundColor: "#0006" }} onPress={() => setPicked(null)} />
+      <Modal visible={!!picked} transparent animationType="slide" onRequestClose={() => { setPicked(null); setDealEmail(""); }}>
+        <Pressable style={{ flex: 1, backgroundColor: "#0006" }} onPress={() => { setPicked(null); setDealEmail(""); }} />
         {picked ? (
           <View style={{ backgroundColor: "#fff", padding: 20, borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
             <Text style={s.h1}>{leadName(picked)}</Text>
@@ -91,6 +112,19 @@ export default function LeadsScreen() {
               <Button title="Call" variant="outline" style={{ flex: 1 }} onPress={() => Linking.openURL(`tel:${picked.mobile}`)} />
               <Button title="Visit now" style={{ flex: 1 }} onPress={() => { const l = picked; setPicked(null); nav.navigate("StartVisit", { lead: l }); }} />
             </View>
+            {picked.convertedToOppurtunity ? (
+              <Button title="Open deal" variant="success" style={{ marginTop: 10 }}
+                onPress={() => { const id = picked.convertedToOppurtunity!; setPicked(null); nav.navigate("Deal", { id }); }} />
+            ) : (
+              <View style={{ marginTop: 12 }}>
+                {!picked.email ? (
+                  <Field label="Customer email (for the quote)" value={dealEmail} onChangeText={setDealEmail}
+                    keyboardType="email-address" autoCapitalize="none" placeholder="name@example.com" />
+                ) : null}
+                <Button title="Make it a deal" variant="success" loading={converting}
+                  disabled={!picked.email && !dealEmail.trim()} onPress={() => makeDeal(picked)} />
+              </View>
+            )}
           </View>
         ) : null}
       </Modal>

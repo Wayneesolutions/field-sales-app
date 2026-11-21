@@ -15,6 +15,9 @@ import ProfileScreen from "./src/screens/ProfileScreen";
 import StartVisitScreen from "./src/screens/StartVisitScreen";
 import CompleteVisitScreen from "./src/screens/CompleteVisitScreen";
 import AddLeadScreen from "./src/screens/AddLeadScreen";
+import DealsScreen from "./src/screens/DealsScreen";
+import DealScreen from "./src/screens/DealScreen";
+import NewQuoteScreen from "./src/screens/NewQuoteScreen";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -26,13 +29,14 @@ function MainTabs() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarIcon: ({ color, size }) => {
-          const icon = { Today: "today-outline", Leads: "people-outline", Me: "person-circle-outline" }[route.name] as any;
+          const icon = { Today: "today-outline", Leads: "people-outline", Deals: "briefcase-outline", Me: "person-circle-outline" }[route.name] as any;
           return <Ionicons name={icon} size={size} color={color} />;
         },
       })}
     >
       <Tabs.Screen name="Today" component={HomeScreen} />
       <Tabs.Screen name="Leads" component={LeadsScreen} />
+      <Tabs.Screen name="Deals" component={DealsScreen} />
       <Tabs.Screen name="Me" component={ProfileScreen} />
     </Tabs.Navigator>
   );
@@ -51,6 +55,8 @@ function Root() {
           <Stack.Screen name="StartVisit" component={StartVisitScreen} options={{ title: "Start visit" }} />
           <Stack.Screen name="CompleteVisit" component={CompleteVisitScreen} options={{ title: "Finish visit" }} />
           <Stack.Screen name="AddLead" component={AddLeadScreen} options={{ title: "New lead" }} />
+          <Stack.Screen name="Deal" component={DealScreen} options={{ title: "Deal" }} />
+          <Stack.Screen name="NewQuote" component={NewQuoteScreen} options={{ title: "New quote" }} />
         </>
       ) : (
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
